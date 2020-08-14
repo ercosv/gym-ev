@@ -12,12 +12,11 @@ class WalkEnv_ev(discrete.DiscreteEnv):
     metadata = {'render.modes': ['human', 'ansi']}
     
     def __init__(self, n_states = 300, nQ=100, nR=3, p11=0.93, p12=0.06, p13=0.01, p21=0.01, p22=0.98, p23=0.01, p31=0.01, p32=0.06, p33=0.93):
-	# two terminal states added
-	bet=0.97
-	acap=0.4
-	del=0.1
+	beta=0.97
+	aap=0.40
+	delta=0.1
 	a2=1.0
-	kss = (acap/(bet**(-1)-(1-del)))**(1/(1-acap))
+	ks=(aap/(beta**(-1)-(1-delta)))**(1/(1-aap))
 	Qg = np.linspace(kss*0.5,kss*1.5,nQ)
         Qg = Qg.reshape((nQ,1))
         Rg = np.linspace(-0.1,0.1,nR)
@@ -54,8 +53,8 @@ class WalkEnv_ev(discrete.DiscreteEnv):
                 for irp in range(nR):
                     p_forward = Rp[ir,irp]
                     s_forward = irp * nQ + a
-                    tmp       = Qg[a,0] - (1-del)*Qt[s,0]
-                    r_forward = (Qt[s,0]**acap)*np.exp(Rt[s,0]) - tmp - 0.5*a2*Qt[s,0]*((tmp/Qt[s,0] - del)**2)
+                    tmp       = Qg[a,0] - (1-delta)*Qt[s,0]
+                    r_forward = (Qt[s,0]**aap)*np.exp(Rt[s,0]) - tmp - 0.5*a2*Qt[s,0]*((tmp/Qt[s,0]-delta)**2)
                     d_forward = 0
                     P[s][a].append((p_forward, s_forward, r_forward, d_forward))
     
