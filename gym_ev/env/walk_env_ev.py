@@ -11,7 +11,7 @@ class WalkEnv_ev(discrete.DiscreteEnv):
 
     metadata = {'render.modes': ['human', 'ansi']}
     
-    def __init__(self, n_states = 100*3, nQ=100, nR=3, p11=0.8, p12=0.15, p13=0.05, p21=0.15, p22=0.70, p23=0.15, p31=0.05, p32=0.15, p33=0.80):
+    def __init__(self, n_states = 300, nQ=100, nR=3, p11=0.8, p12=0.15, p13=0.05, p21=0.15, p22=0.70, p23=0.15, p31=0.05, p32=0.15, p33=0.80):
 
         # two terminal states added
         Qg = np.linspace(2,7,nQ)
