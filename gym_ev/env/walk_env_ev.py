@@ -5,32 +5,50 @@ from string import ascii_uppercase
 
 from gym import utils
 from gym.envs.toy_text import discrete
+from scipy.stats import norm
 
 
 class WalkEnv_ev(discrete.DiscreteEnv):
 
     metadata = {'render.modes': ['human', 'ansi']}
     
-    def __init__(self, n_states = 300, nQ=100, nR=3, p11=0.93, p12=0.06, p13=0.01, p21=0.01, p22=0.98, p23=0.01, p31=0.01, p32=0.06, p33=0.93):
+    def __init__(self, n_states=300, nQ=100, nR=3):
+        ## Begin Markov
+        m = 3
+        sigma_u  = 0.08 / np.sqrt(12)
+        rho  = 0.80
+        F = norm(loc=0, scale=sigma_u).cdf
+        # standard deviation of y_t
+        std_y = np.sqrt(sigma_u**2 / (1-rho**2))
+        # top of discrete state space
+        x_max = m * std_y
+        # bottom of discrete state space
+        x_min = - x_max
+        # discretized state space
+        x = np.linspace(x_min, x_max, nR)
+        step = (x_max - x_min) / (nR - 1)
+        half_step = 0.5 * step
+        Rp = np.empty((nR, nR))
+        
+        for i in range(nR):
+            Rp[i, 0] = F(x[0]-rho * x[i] + half_step)
+            Rp[i, nR-1] = 1 - F(x[nR-1] - rho * x[i] - half_step)
+            for j in range(1, nR-1):
+                z = x[j] - rho * x[i]
+                Rp[i, j] = F(z + half_step) - F(z - half_step)
+                
+        Rg = x
+        ## End Markov
+    
         beta=0.97
         aap=0.40
         delta=0.1
         a2=1.0
-        kss=(aap/(beta**(-1)-(1-delta)))**(1/(1-aap))
+        kss=(aap*np.exp(0.5*(sigma_u**2))/(beta**(-1)-(1-delta)))**(1/(1-aap))
         Qg = np.linspace(kss*0.5,kss*1.5,nQ)
-        Qg = Qg.reshape((nQ,1))
-        Rg = np.linspace(-0.1,0.1,nR)
-        Rg = Rg.reshape((nR,1))
-        Rp = np.zeros((nR,nR))
-        Rp[0,0] = p11
-        Rp[0,1] = p12
-        Rp[0,2] = p13
-        Rp[1,0] = p21
-        Rp[1,1] = p22
-        Rp[1,2] = p23
-        Rp[2,0] = p31
-        Rp[2,1] = p32
-        Rp[2,2] = p33    
+        
+        Qg = Qg.reshape((nQ,1), order='F')
+        Rg = Rg.reshape((nR,1), order='F')
 
         Rt = np.kron(Rg,np.ones((nQ,1)))
         Qt = np.kron(np.ones((nR,1)),Qg)
