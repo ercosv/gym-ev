@@ -12,12 +12,12 @@ class WalkEnv_ev(discrete.DiscreteEnv):
     metadata = {'render.modes': ['human', 'ansi']}
     
     def __init__(self, n_states = 300, nQ=100, nR=3, p11=0.93, p12=0.06, p13=0.01, p21=0.01, p22=0.98, p23=0.01, p31=0.01, p32=0.06, p33=0.93):
-	beta=0.97
-	aap=0.40
-	delta=0.1
-	a2=1.0
-	ks=(aap/(beta**(-1)-(1-delta)))**(1/(1-aap))
-	Qg = np.linspace(kss*0.5,kss*1.5,nQ)
+        beta=0.97
+        aap=0.40
+        delta=0.1
+        a2=1.0
+        kss=(aap/(beta**(-1)-(1-delta)))**(1/(1-aap))
+        Qg = np.linspace(kss*0.5,kss*1.5,nQ)
         Qg = Qg.reshape((nQ,1))
         Rg = np.linspace(-0.1,0.1,nR)
         Rg = Rg.reshape((nR,1))
