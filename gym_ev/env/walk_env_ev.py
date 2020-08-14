@@ -12,37 +12,54 @@ WEST, EAST = 0, 1
 class WalkEnv_ev(discrete.DiscreteEnv):
 
     metadata = {'render.modes': ['human', 'ansi']}
-
-    def __init__(self, n_states=7, p_stay=0.0, p_backward=0.5):
+    
+    def __init__(self, nQ=100, nR=3, p11=0.8, p12=0.15, p13=0.05, p21=0.15, p22=0.70, p23=0.15, p31=0.05, p32=0.15, p33=0.80):
 
         # two terminal states added
-        self.shape = (1, n_states + 2)
+        n_states = nQ*nR
+               
+        Qg = np.linspace(2,7,nQ)
+        Qg = Qg.reshape((nQ,1))
+        Rg = np.linspace(-0.07,0.07,nR)
+        Rg = Rg.reshape((nR,1))
+        Rp = np.zeros((nR,nR))
+        W[0,0] = p11
+        W[0,1] = p12
+        W[0,2] = p13
+        W[1,0] = p21
+        W[1,1] = p22
+        W[1,2] = p23
+        W[2,0] = p31
+        W[2,1] = p32
+        W[2,2] = p33    
+
+        Rt = np.kron(Rg,np.ones((nQ,1)))
+        Qt = np.kron(np.ones((nR,1)),Qg)
+        
+        self.shape = (1, n_states + 0)
         self.start_state_index = self.shape[1]//2
 
         self.nS = nS = np.prod(self.shape)
-        self.nA = nA = 2
+        self.nA = nA = nQ
 
         P = {}
         for s in range(nS):
             P[s] = {}
+            iq   = s % nQ
+            ir   = int(((s-iq)/nQ) % nR)
+            
             for a in range(nA):
-                p_forward = 1.0 - p_stay - p_backward
-
-                s_forward = np.clip(s - 1 if a == WEST else s + 1, 0, nS - 1) if s != 0 and s != nS - 1 else s
-                s_backward = np.clip(s + 1 if a == WEST else s - 1, 0, nS - 1) if s != 0 and s != nS - 1 else s
-
-                r_forward = 1.0 if s == nS - 2 and s_forward == nS - 1 else 0.0
-                r_backward = 1.0 if s == nS - 2 and s_backward == nS - 1 else 0.0
-
-                d_forward = s >= nS - 2 and s_forward == nS - 1 or s <= 1 and s_forward == 0
-                d_backward = s >= nS - 2 and s_backward == nS - 1 or s <= 1 and s_backward == 0
-
-                P[s][a] = [
-                    (p_forward, s_forward, r_forward, d_forward),
-                    (p_stay, s, 0.0, s == nS - 1 or s == 0),
-                    (p_backward, s_backward, r_backward, d_backward)
-                ]
-
+                P[s][a] = []
+                
+                for irp in range(nR):
+                    p_forward = Rp[ir,irp]
+                    s_forward = irp * nQ + a
+                    tmp       = Qg[a,0] - (1-0.1)*Qt[s,0]
+                    r_forward = (Qt[s,0]**0.3) * np.exp(Rt[s,0]) - tmp - 0.1*Qt[s,0]*((tmp/Qt[s,0] - 0.1)**2)
+                    d_forward = 0
+                    P[s][a].append((p_forward, s_forward, r_forward, d_forward))
+    
+    
         isd = np.zeros(nS)
         isd[self.start_state_index] = 1.0
         discrete.DiscreteEnv.__init__(self, nS, nA, P, isd)
