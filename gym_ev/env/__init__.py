@@ -1,1 +1,1 @@
-from gym_ev.envs.walk_env_ev import WalkEnv_ev
+from gym_ev.env.walk_env_ev import WalkEnv_ev
