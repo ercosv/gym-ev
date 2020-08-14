@@ -6,32 +6,28 @@ from string import ascii_uppercase
 from gym import utils
 from gym.envs.toy_text import discrete
 
-WEST, EAST = 0, 1
-
 
 class WalkEnv_ev(discrete.DiscreteEnv):
 
     metadata = {'render.modes': ['human', 'ansi']}
     
-    def __init__(self, nQ=100, nR=3, p11=0.8, p12=0.15, p13=0.05, p21=0.15, p22=0.70, p23=0.15, p31=0.05, p32=0.15, p33=0.80):
+    def __init__(self, n_states = 100*3, nQ=100, nR=3, p11=0.8, p12=0.15, p13=0.05, p21=0.15, p22=0.70, p23=0.15, p31=0.05, p32=0.15, p33=0.80):
 
         # two terminal states added
-        n_states = nQ*nR
-               
         Qg = np.linspace(2,7,nQ)
         Qg = Qg.reshape((nQ,1))
         Rg = np.linspace(-0.07,0.07,nR)
         Rg = Rg.reshape((nR,1))
         Rp = np.zeros((nR,nR))
-        W[0,0] = p11
-        W[0,1] = p12
-        W[0,2] = p13
-        W[1,0] = p21
-        W[1,1] = p22
-        W[1,2] = p23
-        W[2,0] = p31
-        W[2,1] = p32
-        W[2,2] = p33    
+        Rp[0,0] = p11
+        Rp[0,1] = p12
+        Rp[0,2] = p13
+        Rp[1,0] = p21
+        Rp[1,1] = p22
+        Rp[1,2] = p23
+        Rp[2,0] = p31
+        Rp[2,1] = p32
+        Rp[2,2] = p33    
 
         Rt = np.kron(Rg,np.ones((nQ,1)))
         Qt = np.kron(np.ones((nR,1)),Qg)
