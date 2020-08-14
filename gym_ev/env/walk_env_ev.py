@@ -12,7 +12,7 @@ class WalkEnv_ev(discrete.DiscreteEnv):
 
     metadata = {'render.modes': ['human', 'ansi']}
     
-    def __init__(self, n_states=300, nQ=100, nR=3):
+    def __init__(self, n_states=4500, nQ=500, nR=9):
         ## Begin Markov
         m = 3
         sigma_u  = 0.08 / np.sqrt(12)
